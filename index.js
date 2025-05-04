@@ -74,6 +74,21 @@ async function run() {
         res.send(result);
       });
   
+      app.get('/queries-home', async (req, res) => {
+        const cursor = productsCollection.find().limit(6);
+        const result = await cursor.toArray();
+        res.send(result);
+      });
+  
+      app.get('/queries/:email', verifyToken, async (req, res) => {
+        const decodedEmail = req.user?.email;
+        const email = req.params.email;
+        if (decodedEmail !== email) return res.status(403).send({ message: 'Forbidden access' });
+  
+        const result = await productsCollection.find({ email }).sort({ date: -1 }).toArray();
+        res.send(result);
+      });
+  
     
   
       await client.connect();
