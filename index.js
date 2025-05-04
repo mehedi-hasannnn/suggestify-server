@@ -109,6 +109,21 @@ async function run() {
         res.send(result);
       });
   
+      // Recommendation APIs
+      app.post('/add-recommand', async (req, res) => {
+        const data = req.body;
+        const query = { email: data.recommandEmail, queryId: data.queryId };
+        const alreadyExist = await recommendCollection.findOne(query);
+        if (alreadyExist) return res.status(401).send('You have already Recommanded');
+  
+        const result = await recommendCollection.insertOne(data);
+        await productsCollection.updateOne(
+          { _id: new ObjectId(data.queryId) },
+          { $inc: { count: 1 } }
+        );
+        res.send(result);
+      });
+  
     
   
       await client.connect();
