@@ -10,7 +10,11 @@ const port = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:5173'],
+  origin: [
+            'http://localhost:5173',
+            'https://suggestify-bd.web.app',
+            'https://suggestify-bd.firebaseapp.com'
+        ],
   credentials: true
 }));
 app.use(express.json());
@@ -52,12 +56,12 @@ async function run() {
   
         res.cookie('token', token, {
           httpOnly: true,
-          secure: false,
+          secure: process.env.NODE_ENV=== 'production'
         }).send({ success: true });
       });
   
       app.post('/logout', (req, res) => {
-        res.clearCookie('token', { httpOnly: true, secure: false }).send({ success: true });
+        res.clearCookie('token', { httpOnly: true, process.env.NODE_ENV=== 'production' }).send({ success: true });
       });
   
       // Product (Query) APIs
@@ -162,9 +166,9 @@ async function run() {
         res.send({ success: true, message: 'Recommendation deleted successfully' });
       });
   
-      await client.connect();
-      await client.db("admin").command({ ping: 1 });
-      console.log("Connected to MongoDB!");
+    //   await client.connect();
+    //   await client.db("admin").command({ ping: 1 });
+    //   console.log("Connected to MongoDB!");
     } catch (err) {
       console.error(" Error connecting:", err);
     }
