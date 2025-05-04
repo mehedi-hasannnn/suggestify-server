@@ -60,6 +60,20 @@ async function run() {
         res.clearCookie('token', { httpOnly: true, secure: false }).send({ success: true });
       });
   
+      // Product (Query) APIs
+      app.post('/add-query', verifyToken, async (req, res) => {
+        const productData = req.body;
+        const result = await productsCollection.insertOne(productData);
+        res.send(result);
+      });
+  
+      app.get('/queries', async (req, res) => {
+        const search = req.query.search;
+        let query = { productName: { $regex: search, $options: 'i' } };
+        const result = await productsCollection.find(query).toArray();
+        res.send(result);
+      });
+  
     
   
       await client.connect();
