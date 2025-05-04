@@ -124,6 +124,19 @@ async function run() {
         res.send(result);
       });
   
+      app.get('/recommendations/:queryId', async (req, res) => {
+        const recommendations = await recommendCollection.find({ queryId: req.params.queryId }).toArray();
+        res.send(recommendations);
+      });
+  
+      app.get('/recommand/:email', verifyToken, async (req, res) => {
+        const decodedEmail = req.user?.email;
+        if (decodedEmail !== req.params.email) return res.status(403).send({ message: 'Forbidden access' });
+  
+        const result = await recommendCollection.find({ email: req.params.email }).toArray();
+        res.send(result);
+      });
+  
     
   
       await client.connect();
