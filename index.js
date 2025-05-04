@@ -89,6 +89,26 @@ async function run() {
         res.send(result);
       });
   
+      app.delete('/query/:id', verifyToken, async (req, res) => {
+        const result = await productsCollection.deleteOne({ _id: new ObjectId(req.params.id) });
+        res.send(result);
+      });
+  
+      app.get('/query/:id', async (req, res) => {
+        const result = await productsCollection.findOne({ _id: new ObjectId(req.params.id) });
+        res.send(result);
+      });
+  
+      app.put('/update-query/:id', async (req, res) => {
+        const update = { $set: req.body };
+        const result = await productsCollection.updateOne(
+          { _id: new ObjectId(req.params.id) },
+          update,
+          { upsert: true }
+        );
+        res.send(result);
+      });
+  
     
   
       await client.connect();
