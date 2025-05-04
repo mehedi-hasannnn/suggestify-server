@@ -45,7 +45,29 @@ async function run() {
     const productsCollection = db.collection('products');
     const recommendCollection = db.collection('recommand');
 
-
+    // Auth
+    app.post('/jwt', (req, res) => {
+        const user = req.body;
+        const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '10h' });
+  
+        res.cookie('token', token, {
+          httpOnly: true,
+          secure: false,
+        }).send({ success: true });
+      });
+  
+      app.post('/logout', (req, res) => {
+        res.clearCookie('token', { httpOnly: true, secure: false }).send({ success: true });
+      });
+  
+    
+  
+      await client.connect();
+      await client.db("admin").command({ ping: 1 });
+      console.log("Connected to MongoDB!");
+    } catch (err) {
+      console.error(" Error connecting:", err);
+    }
 }
 run().catch(console.dir);
 
