@@ -137,7 +137,30 @@ async function run() {
         res.send(result);
       });
   
-    
+      app.get('/recommand-request/:email', verifyToken, async (req, res) => {
+        const decodedEmail = req.user?.email;
+        if (decodedEmail !== req.params.email) return res.status(403).send({ message: 'Forbidden access' });
+  
+        const result = await recommendCollection.find({ recommandEmail: req.params.email }).toArray();
+        res.send(result);
+      });
+  
+      app.delete('/delete-recommand/:id', verifyToken, async (req, res) => {
+        const decodedEmail = req.user?.email;
+        const recommendation = await recommendCollection.findOne({ _id: new ObjectId(req.params.id) });
+  
+        if (!recommendation || recommendation.recommandEmail !== decodedEmail) {
+          return res.status(403).send({ message: 'Forbidden access' });
+        }
+  
+        await recommendCollection.deleteOne({ _id: new ObjectId(req.params.id) });
+        await productsCollection.updateOne(
+          { _id: new ObjectId(recommendation.queryId) },
+          { $inc: { count: -1 } }
+        );
+  
+        res.send({ success: true, message: 'Recommendation deleted successfully' });
+      });
   
       await client.connect();
       await client.db("admin").command({ ping: 1 });
